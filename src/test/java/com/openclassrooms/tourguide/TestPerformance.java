@@ -59,12 +59,19 @@ public class TestPerformance {
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
-//		int i=0;
-		for (User user : allUsers) {
-//			i++;
-			tourGuideService.trackUserLocation(user);
-//			System.out.println("size of "+i+"th user reward is "+user.getUserRewards().size());
 
+		for (User user : allUsers) {
+
+			tourGuideService.trackUserLocation(user);
+
+		}
+		for(User user : allUsers) {
+			while (user.getVisitedLocations().size()< 5) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(200);
+				}
+				catch (InterruptedException e) {}
+			}
 		}
 		stopWatch.stop();
 		tourGuideService.tracker.stopTracking();
@@ -88,15 +95,13 @@ public class TestPerformance {
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
 		Attraction attraction = gpsUtil.getAttractions().get(0);
-//		System.out.println("list of attraction from gpsUtil is : "+gpsUtil.getAttractions().get(0));
 		List<User> allUsers = new ArrayList<>();
 		allUsers = tourGuideService.getAllUsers();
 		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
 		allUsers.forEach(u -> rewardsService.calculateRewards(u));
 
-//		System.out.println("size of allUsers is "+allUsers.size());
-//		int i =0;
+
 		for (User user : allUsers) {
 			while (user.getUserRewards().isEmpty()) {
 				try {
@@ -104,11 +109,9 @@ public class TestPerformance {
 				} catch (InterruptedException e) {
 				}
 			}
-			user.addToVisitedLocations(new VisitedLocation(user.getUserId(),attraction,new Date()));
-			rewardsService.calculateRewards(user);
+		}
+		for (User user : allUsers) {
 			assertTrue(user.getUserRewards().size() > 0);
-//			 i++;
-//			System.out.println("size of "+i+"th user reward is "+user.getUserRewards().size());
 		}
 
 
