@@ -38,7 +38,7 @@ public class TourGuideService {
 	public final Tracker tracker;
 	private final RewardCentral rewardsCentral = new RewardCentral();
 	boolean testMode = true;
-	private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+	private final ExecutorService executorService = Executors.newFixedThreadPool(1000);
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
@@ -77,29 +77,29 @@ public class TourGuideService {
 		}
 	}
 
-	public List<NearByAttraction> getNearByAttraction(User user) {
-		//		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
-		//				: trackUserLocation(user);
-		//		return visitedLocation;
-
-
-		List<NearByAttraction>attractionListOffer = new LinkedList<>();
-		VisitedLocation lastVisitedLocation = user.getLastVisitedLocation();
-		Map<Attraction,Double> attractionList = gpsUtil.getAttractions().stream()
-				.collect(Collectors.toMap(r->r,r->rewardsService.getDistance(r,lastVisitedLocation.location)));
-		attractionList.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
-				.forEach(r->{
-					NearByAttraction nearByAttraction = new NearByAttraction();
-					nearByAttraction.setTouristAttractionName(r.getKey().attractionName);
-					nearByAttraction.setTouristAttractionLat(r.getKey().latitude);
-					nearByAttraction.setTouristAttractionLong(r.getKey().longitude);
-					nearByAttraction.setDistance(r.getValue());
-					nearByAttraction.setRewardPoint(rewardsCentral.getAttractionRewardPoints(r.getKey().attractionId,user.getUserId()));
-					attractionListOffer.add(nearByAttraction);
-				});
-		return attractionListOffer;
-
-	}
+//	public List<NearByAttraction> getNearByAttraction(User user) {
+//		//		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
+//		//				: trackUserLocation(user);
+//		//		return visitedLocation;
+//
+//
+//		List<NearByAttraction>attractionListOffer = new LinkedList<>();
+//		VisitedLocation lastVisitedLocation = user.getLastVisitedLocation();
+//		Map<Attraction,Double> attractionList = gpsUtil.getAttractions().stream()
+//				.collect(Collectors.toMap(r->r,r->rewardsService.getDistance(r,lastVisitedLocation.location)));
+//		attractionList.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
+//				.forEach(r->{
+//					NearByAttraction nearByAttraction = new NearByAttraction();
+//					nearByAttraction.setTouristAttractionName(r.getKey().attractionName);
+//					nearByAttraction.setTouristAttractionLat(r.getKey().latitude);
+//					nearByAttraction.setTouristAttractionLong(r.getKey().longitude);
+//					nearByAttraction.setDistance(r.getValue());
+//					nearByAttraction.setRewardPoint(rewardsCentral.getAttractionRewardPoints(r.getKey().attractionId,user.getUserId()));
+//					attractionListOffer.add(nearByAttraction);
+//				});
+//		return attractionListOffer;
+//
+//	}
 
 	public User getUser(String userName) {
 		return internalUserMap.get(userName);
@@ -135,17 +135,22 @@ public class TourGuideService {
 			user.addToVisitedLocations(visitedLocation);
 			rewardsService.calculateRewards(user);
 			return visitedLocation;
-		}, executorService);
+		},executorService);
 	}
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
-		Map<Attraction,Double> map = (Map<Attraction, Double>) gpsUtil.getAttractions().stream()
-				.collect(Collectors.toMap(r->r,r->rewardsService.getDistance(r,visitedLocation.location)));
+		HashMap<Attraction, Double> attractionToDistance = new HashMap<>();
+		gpsUtil.getAttractions().forEach((attraction) -> {
+			double distance = rewardsService.getDistance(attraction, visitedLocation.location);
+			attractionToDistance.put(attraction, distance);
+		});
 
-	 	map.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
-				.forEach(r->nearbyAttractions.add(r.getKey()));
-//				.collect(Collectors.toList());
+		List<Attraction> nearbyAttractions = new ArrayList<>();
+		attractionToDistance.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue())
+				.limit(5) // Limiter à 5 attractions
+				.forEach(entry -> nearbyAttractions.add(entry.getKey()));
+
 		return nearbyAttractions;
 	}
 
@@ -205,33 +210,33 @@ public class TourGuideService {
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
 	}
 
-	private Attraction generateRandomAttraction() {
-	List<Attraction> attractionsList = gpsUtil.getAttractions();
-		Random r = new Random();
-		int low = 0;
-		int high = 26;
-		int random = r.nextInt(high-low) + low;
+//	private Attraction generateRandomAttraction() {
+//	List<Attraction> attractionsList = gpsUtil.getAttractions();
+//		Random r = new Random();
+//		int low = 0;
+//		int high = 26;
+//		int random = r.nextInt(high-low) + low;
+//
+//		return attractionsList.get(random);
+//	}
 
-		return attractionsList.get(random);
-	}
 
+//	private int generateRandomRewardPoint(){
+//		Random r = new Random();
+//		int low = 1;
+//		int high = 10;
+//		int random = r.nextInt(high-low) + low;
+//
+//		return random;
+//	}
 
-	private int generateRandomRewardPoint(){
-		Random r = new Random();
-		int low = 1;
-		int high = 10;
-		int random = r.nextInt(high-low) + low;
-
-		return random;
-	}
-
-	private void generateRandomUserReward(User user) {
-		IntStream.range(0, 3).forEach(i -> {
-			user.addUserReward(new UserReward(new VisitedLocation(user.getUserId(),
-					new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime())
-					,generateRandomAttraction(),
-					generateRandomRewardPoint()));
-		});
-	}
+//	private void generateRandomUserReward(User user) {
+//		IntStream.range(0, 3).forEach(i -> {
+//			user.addUserReward(new UserReward(new VisitedLocation(user.getUserId(),
+//					new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime())
+//					,generateRandomAttraction(),
+//					generateRandomRewardPoint()));
+//		});
+//	}
 
 }

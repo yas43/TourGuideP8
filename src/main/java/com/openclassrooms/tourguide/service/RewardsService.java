@@ -3,6 +3,7 @@ package com.openclassrooms.tourguide.service;
 import java.util.*;
 import java.util.concurrent.*;
 
+import lombok.*;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -19,21 +20,26 @@ public class RewardsService {
 
 	// proximity in miles
     private int defaultProximityBuffer = 10;
+	@Setter
 	private int proximityBuffer = defaultProximityBuffer;
 	private int attractionProximityRange = 200;
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
-	ExecutorService service = Executors.newFixedThreadPool(10);
+	ExecutorService service = Executors.newFixedThreadPool(1000);
 	
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
 	}
-	
+
+	public int getProximityBuffer() {
+		return proximityBuffer;
+	}
+
 	public void setProximityBuffer(int proximityBuffer) {
 		this.proximityBuffer = proximityBuffer;
 	}
-	
+
 	public void setDefaultProximityBuffer() {
 		proximityBuffer = defaultProximityBuffer;
 	}
