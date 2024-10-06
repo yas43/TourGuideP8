@@ -71,13 +71,9 @@ public class User {
 	}
 	
 	public void addUserReward(UserReward userReward) {
-		if(userRewards.stream().filter(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName)).count() == 0) {
+		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
 			userRewards.add(userReward);
 		}
-
-
-//		userRewards.stream().dropWhile(userReward1 -> userReward1.attraction.attractionName.equals(userReward1.attraction))
-//				.forEach(Reward->userRewards.add(Reward));
 
 	}
 	
@@ -105,4 +101,7 @@ public class User {
 		return tripDeals;
 	}
 
+	public void setUserRewards(CopyOnWriteArrayList<UserReward> userRewards) {
+		this.userRewards = userRewards;
+	}
 }
