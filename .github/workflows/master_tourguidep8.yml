@@ -26,6 +26,9 @@ jobs:
           cache: 'maven'
           distribution: 'microsoft'
 
+      - name: Run Tests with Maven
+        run: mvn test
+
       - name: Build with Maven
         run: mvn clean install
 
@@ -48,11 +51,11 @@ jobs:
         with:
           name: java-app
       
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'TourGuideP8'
-          slot-name: 'Production'
-          package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9018C7123BFA430182062FC1BDC3CD13 }}
+      # - name: Deploy to Azure Web App
+      #   id: deploy-to-webapp
+      #   uses: azure/webapps-deploy@v3
+      #   with:
+      #     app-name: 'TourGuideP8'
+      #     slot-name: 'Production'
+      #     package: '*.jar'
+      #     publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9018C7123BFA430182062FC1BDC3CD13 }}
