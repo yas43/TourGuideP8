@@ -20,7 +20,6 @@ public class RewardsService {
 
 	// proximity in miles
     private int defaultProximityBuffer = 10;
-	@Setter
 	private int proximityBuffer = defaultProximityBuffer;
 	private int attractionProximityRange = 200;
 	private final GpsUtil gpsUtil;
@@ -60,26 +59,12 @@ public class RewardsService {
 							if (nearAttraction(visitedLocation, attraction) && notRewarded) {
 								UserReward newUserReward = new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user));
 								userRewards.add(newUserReward);
-//						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
 							}
 						}
 					}
 					user.setUserRewards(userRewards);
 				},service);
 
-//		List<VisitedLocation> userLocations = user.getVisitedLocations();
-//		List<Attraction> attractions = gpsUtil.getAttractions();
-//
-//		userLocations.parallelStream().forEach(visitedLocation -> {
-//			attractions.parallelStream().forEach(attraction -> {
-//				if (user.getUserRewards().stream()
-//						.noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
-//					if (nearAttraction(visitedLocation, attraction)) {
-//						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-//					}
-//				}
-//			});
-//		});
 	}
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
